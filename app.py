@@ -18,29 +18,88 @@ st.markdown("""
 [data-testid="stAppViewContainer"] { background: #F0F4F8; }
 [data-testid="stSidebar"] { background: #1F4E79; }
 [data-testid="stSidebar"] * { color: white !important; }
-.bloc { background: white; border-radius: 16px; padding: 1.5rem;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.07); margin-bottom: 1rem; }
-.titre { font-size: 2rem; font-weight: 800; color: #1F4E79; text-align: center; }
-.sous-titre { font-size: 0.95rem; color: #666;
-              text-align: center; margin-bottom: 1.5rem; }
-.badge { background: #1F4E79; color: white; border-radius: 24px;
-         padding: 0.5rem 1.4rem; font-size: 1.3rem;
-         font-weight: 700; display: inline-block; }
-.conf { font-size: 1rem; color: #2E75B6;
-        font-weight: 600; margin-top: 0.4rem; }
-.desc-box { background: #EAF3DE; border-left: 5px solid #3B6D11;
-            border-radius: 0; padding: 0.8rem 1.2rem;
-            color: #27500A; font-size: 0.95rem; margin: 0.5rem 0; }
-.info-box { background: #E6F1FB; border-left: 5px solid #2E75B6;
-            border-radius: 0; padding: 0.8rem 1.2rem;
-            color: #1F4E79; font-size: 0.95rem; margin: 0.5rem 0; }
+
+/* Supprime toutes les boites jaunes warning */
+div[data-testid="stAlert"] { display: none !important; }
+.stAlert { display: none !important; }
+div.stWarning { display: none !important; }
+
+.bloc {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    margin-bottom: 1rem;
+}
+.titre {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1F4E79;
+    text-align: center;
+}
+.sous-titre {
+    font-size: 0.95rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.badge {
+    background: #1F4E79;
+    color: white;
+    border-radius: 24px;
+    padding: 0.5rem 1.4rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: inline-block;
+}
+.conf {
+    font-size: 1rem;
+    color: #2E75B6;
+    font-weight: 600;
+    margin-top: 0.4rem;
+}
+.desc-box {
+    background: #EAF3DE;
+    border-left: 5px solid #3B6D11;
+    border-radius: 0;
+    padding: 0.8rem 1.2rem;
+    color: #27500A;
+    font-size: 0.95rem;
+    margin: 0.5rem 0;
+}
+.info-box {
+    background: #E6F1FB;
+    border-left: 5px solid #2E75B6;
+    border-radius: 0;
+    padding: 0.8rem 1.2rem;
+    color: #1F4E79;
+    font-size: 0.95rem;
+    margin: 0.5rem 0;
+}
+
+/* Titres des sections en couleur */
+.section-titre-bleu {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #185FA5;
+    border-bottom: 2px solid #185FA5;
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+}
+.section-titre-vert {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #3B6D11;
+    border-bottom: 2px solid #3B6D11;
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
 CLASSES  = ["Arborio", "Basmati", "Ipsala", "Jasmine", "Karacadag"]
 IMG_SIZE = (224, 224)
 
-# URL de l API FastAPI deployee sur Railway
 API_URL = "https://riz-api-production.up.railway.app"
 
 DESCRIPTIONS = {
@@ -51,16 +110,11 @@ DESCRIPTIONS = {
     "Karacadag": "Variete turque a grains courts, tres populaire en cuisine locale.",
 }
 
-# Modele local pour Grad-CAM uniquement
 @st.cache_resource
 def charger_modele_local():
     return tf.keras.models.load_model("modele_riz_final.h5")
 
 def reveiller_api():
-    """
-    Railway met le service en veille apres 30 min d inactivite.
-    On fait jusqu a 3 tentatives pour le reveiller.
-    """
     for i in range(3):
         try:
             r = requests.get(f"{API_URL}/health", timeout=15)
@@ -86,19 +140,15 @@ with st.sidebar:
     st.markdown("---")
     show_gc = st.checkbox("Afficher Grad-CAM", value=True)
     st.markdown("---")
-
-    # Statut API avec reveil automatique
     st.markdown("### Statut API")
     with st.spinner("Connexion a l API..."):
         api_ok, api_info = reveiller_api()
-
     if api_ok:
         st.success("API connectee ✓")
         st.caption(f"Modele : {api_info.get('modele', 'MobileNetV2')}")
     else:
         st.warning("API en demarrage...")
         st.info("Patientez 30 secondes et rechargez la page.")
-
     st.markdown("---")
     st.markdown(f"[Documentation API]({API_URL}/docs)")
     st.markdown("---")
@@ -124,14 +174,22 @@ col_g, col_d = st.columns([1, 1.4], gap="large")
 
 with col_g:
     st.markdown("<div class='bloc'>", unsafe_allow_html=True)
-    st.markdown("#### Image a analyser")
+
+    # Titre en bleu
+    st.markdown(
+        "<div class='section-titre-bleu'>📁 Image a analyser</div>",
+        unsafe_allow_html=True
+    )
+
     fichier = st.file_uploader(
         "Deposez une image de riz (JPG ou PNG)",
-        type=["jpg", "jpeg", "png"]
+        type=["jpg", "jpeg", "png"],
+        label_visibility="collapsed"
     )
     if fichier:
         img_pil = Image.open(fichier).convert("RGB")
-        st.image(img_pil, use_column_width=True)
+        # CORRECTION : use_container_width remplace use_column_width
+        st.image(img_pil, use_container_width=True)
         st.caption(f"Dimensions : {img_pil.size[0]} x {img_pil.size[1]} px")
         analyser = st.button(
             "🔍 Analyser",
@@ -152,7 +210,12 @@ with col_g:
 
 with col_d:
     st.markdown("<div class='bloc'>", unsafe_allow_html=True)
-    st.markdown("#### Resultats de l analyse")
+
+    # Titre en vert
+    st.markdown(
+        "<div class='section-titre-vert'>📊 Resultats de l analyse</div>",
+        unsafe_allow_html=True
+    )
 
     if fichier and analyser:
 
@@ -165,7 +228,6 @@ with col_d:
                 "</div>",
                 unsafe_allow_html=True
             )
-
         else:
             with st.spinner("Envoi de l image a l API FastAPI..."):
                 fichier.seek(0)
@@ -184,7 +246,6 @@ with col_d:
             conf = result["confiance"]
             prob = result["probabilites"]
 
-            # Prediction principale
             st.markdown(
                 f"<div class='badge'>{cls}</div>",
                 unsafe_allow_html=True
@@ -202,7 +263,6 @@ with col_d:
             )
             st.markdown("---")
 
-            # Graphique probabilites
             st.markdown("**Probabilites par classe :**")
             fig, ax = plt.subplots(figsize=(6, 3))
             fig.patch.set_facecolor("white")
@@ -229,10 +289,14 @@ with col_d:
             st.pyplot(fig, use_container_width=True)
             plt.close()
 
-            # Grad-CAM
             if show_gc:
                 st.markdown("---")
-                st.markdown("#### Grad-CAM — Zones d attention")
+                st.markdown(
+                    "<div class='section-titre-bleu'>"
+                    "🔬 Grad-CAM — Zones d attention"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
                 st.markdown(
                     "<div class='info-box'>"
                     "Les zones en rouge sont les plus influentes "
@@ -257,23 +321,32 @@ with col_d:
                 hm = hm / (hm.max() + 1e-8)
                 ia = np.array(img_pil.resize(IMG_SIZE), dtype=np.uint8)
                 hc = cv2.cvtColor(
-                    cv2.applyColorMap(np.uint8(255 * hm), cv2.COLORMAP_JET),
+                    cv2.applyColorMap(
+                        np.uint8(255 * hm), cv2.COLORMAP_JET
+                    ),
                     cv2.COLOR_BGR2RGB
                 )
                 sup = cv2.addWeighted(ia, 0.6, hc, 0.4, 0)
                 c1g, c2g = st.columns(2)
-                c1g.image(img_pil, caption="Originale", use_column_width=True)
+                # CORRECTION : use_container_width
+                c1g.image(
+                    img_pil,
+                    caption="Image originale",
+                    use_container_width=True
+                )
                 c2g.image(
                     Image.fromarray(sup),
                     caption="Grad-CAM",
-                    use_column_width=True
+                    use_container_width=True
                 )
 
     elif not fichier:
         st.markdown("""
         <div style="text-align:center; padding:3rem; color:#aaa;">
             <div style="font-size:4rem">🌾</div>
-            <div>Uploadez une image pour voir les resultats</div>
+            <div style="margin-top:1rem;">
+                Uploadez une image pour voir les resultats ici
+            </div>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
