@@ -30,7 +30,7 @@ CLASSES  = ["Arborio", "Basmati", "Ipsala", "Jasmine", "Karacadag"]
 IMG_SIZE = (224, 224)
 
 # URL de l API deployee sur Render — sera mise a jour apres le deploiement
-API_URL = "https://TON-API.onrender.com"
+API_URL = "https://riz-api-production.up.railway.app"
 
 DESCRIPTIONS = {
     "Arborio"  : "Riz rond originaire d Italie, tres riche en amidon. Ideal pour le risotto.",
